@@ -1,4 +1,4 @@
-# Meeting Room Booking Management System — MVP
+# Meeting Room Booking Management System
 
 Membangun MVP sistem booking ruang meeting berdasarkan [plan.md](file:///c:/dev/booking-room/plan.md). Hanya **Administrator** yang bisa login & melakukan booking. UI kalender mirip Google Calendar (FullCalendar) per room.
 
