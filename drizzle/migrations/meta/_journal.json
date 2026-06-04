@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1780555841929,
+      "tag": "0000_chief_phil_sheldon",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1780556040416,
+      "tag": "0001_nappy_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780557710346,
+      "tag": "0002_tiny_komodo",
+      "breakpoints": true
+    }
+  ]
+}
