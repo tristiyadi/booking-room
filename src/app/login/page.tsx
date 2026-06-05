@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (result.error) {
         setError("Email atau password salah. Silakan coba lagi.");
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");

@@ -42,7 +42,7 @@ export default function RegisterPage() {
       if (result.error) {
         setError(result.error.message || "Gagal mendaftar. Silakan coba lagi.");
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");
