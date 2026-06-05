@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Menu, LogOut, User } from "lucide-react";
+import { Menu, LogOut, User, Globe } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
 interface HeaderProps {
@@ -33,6 +34,13 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
+        <Link
+          href="/"
+          className="p-2 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          title="Ke Beranda Utama (Publik)"
+        >
+          <Globe className="w-4 h-4" />
+        </Link>
         <ThemeToggle />
         {session?.user && (
           <div className="flex items-center gap-3">

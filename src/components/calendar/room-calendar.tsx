@@ -7,6 +7,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventInput, DateSelectArg, EventClickArg } from "@fullcalendar/core";
 import { BookingDialog } from "@/components/calendar/booking-dialog";
+import { toast } from "sonner";
 
 interface Booking {
   id: number;
@@ -66,14 +67,54 @@ export function RoomCalendar({
   }));
 
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
+    const calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
+
+    let startStr = selectInfo.startStr;
+    let endStr = selectInfo.endStr;
+    let end = new Date(selectInfo.end);
+
+    if (selectInfo.allDay) {
+      const baseDate = selectInfo.startStr;
+      startStr = `${baseDate}T07:00:00`;
+      endStr = `${baseDate}T08:00:00`;
+      end = new Date(endStr);
+    }
+
+    const now = new Date();
+    if (end < now) {
+      toast.error("Tidak dapat membuat booking di masa lampau.");
+      return;
+    }
+
+    const parseLocalTime = (isoString: string) => {
+      const match = isoString.match(/T(\d{2}):(\d{2})/);
+      if (!match) return null;
+      return {
+        hour: parseInt(match[1], 10),
+        minute: parseInt(match[2], 10),
+      };
+    };
+
+    const startLocal = parseLocalTime(startStr);
+    const endLocal = parseLocalTime(endStr);
+
+    if (startLocal && endLocal) {
+      const startHour = startLocal.hour;
+      const startMinute = startLocal.minute;
+
+      if (startHour < 7 || startHour > 22 || (startHour === 22 && startMinute > 0)) {
+        toast.error("Waktu pemesanan harus dimulai antara jam 07:00 hingga 22:00.");
+        return;
+      }
+    }
+
     setSelectedRange({
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
+      start: startStr,
+      end: endStr,
     });
     setSelectedBooking(null);
     setDialogOpen(true);
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
   }, []);
 
   const handleEventClick = useCallback(
@@ -156,7 +197,7 @@ export function RoomCalendar({
             day: "Hari",
           }}
           slotMinTime="07:00:00"
-          slotMaxTime="22:00:00"
+          slotMaxTime="23:00:00"
           slotDuration="00:30:00"
           slotLabelInterval="01:00:00"
           slotLabelFormat={{
