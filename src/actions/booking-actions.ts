@@ -50,6 +50,28 @@ export async function createBooking(data: {
     throw new Error("Tidak dapat membuat booking di masa lampau.");
   }
 
+  // Check if time is between 07:00 and 22:00
+  const parseLocalTime = (isoString: string) => {
+    const match = isoString.match(/T(\d{2}):(\d{2})/);
+    if (!match) return null;
+    return {
+      hour: parseInt(match[1], 10),
+      minute: parseInt(match[2], 10),
+    };
+  };
+
+  const startLocal = parseLocalTime(data.startTime);
+  const endLocal = parseLocalTime(data.endTime);
+
+  if (startLocal && endLocal) {
+    const startHour = startLocal.hour;
+    const startMinute = startLocal.minute;
+
+    if (startHour < 7 || startHour > 22 || (startHour === 22 && startMinute > 0)) {
+      throw new Error("Waktu pemesanan harus dimulai antara jam 07:00 hingga 22:00.");
+    }
+  }
+
   // Check for overlapping bookings
   const overlapping = await db
     .select()
@@ -87,6 +109,34 @@ export async function updateBooking(
 ) {
   // If time is changing, check for overlaps
   if (data.startTime && data.endTime) {
+    // Validate past booking
+    const selectEnd = new Date(data.endTime);
+    if (selectEnd < new Date()) {
+      throw new Error("Tidak dapat membuat booking di masa lampau.");
+    }
+
+    // Validate 07:00 to 22:00 range
+    const parseLocalTime = (isoString: string) => {
+      const match = isoString.match(/T(\d{2}):(\d{2})/);
+      if (!match) return null;
+      return {
+        hour: parseInt(match[1], 10),
+        minute: parseInt(match[2], 10),
+      };
+    };
+
+    const startLocal = parseLocalTime(data.startTime);
+    const endLocal = parseLocalTime(data.endTime);
+
+    if (startLocal && endLocal) {
+      const startHour = startLocal.hour;
+      const startMinute = startLocal.minute;
+
+      if (startHour < 7 || startHour > 22 || (startHour === 22 && startMinute > 0)) {
+        throw new Error("Waktu pemesanan harus dimulai antara jam 07:00 hingga 22:00.");
+      }
+    }
+
     const existing = await db
       .select()
       .from(bookings)
