@@ -7,6 +7,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventInput, DateSelectArg, EventClickArg } from "@fullcalendar/core";
 import { BookingDialog } from "@/components/calendar/booking-dialog";
+import { toast } from "sonner";
 
 interface Booking {
   id: number;
@@ -66,14 +67,22 @@ export function RoomCalendar({
   }));
 
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
+    const calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
+
+    const now = new Date();
+    const end = new Date(selectInfo.end);
+    if (end < now) {
+      toast.error("Tidak dapat membuat booking di masa lampau.");
+      return;
+    }
+
     setSelectedRange({
       start: selectInfo.startStr,
       end: selectInfo.endStr,
     });
     setSelectedBooking(null);
     setDialogOpen(true);
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
   }, []);
 
   const handleEventClick = useCallback(

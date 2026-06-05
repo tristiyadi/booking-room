@@ -43,6 +43,13 @@ export async function createBooking(data: {
   startTime: string;
   endTime: string;
 }) {
+  // Check if booking is in the past
+  const now = new Date();
+  const selectEnd = new Date(data.endTime);
+  if (selectEnd < now) {
+    throw new Error("Tidak dapat membuat booking di masa lampau.");
+  }
+
   // Check for overlapping bookings
   const overlapping = await db
     .select()
