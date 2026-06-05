@@ -1,31 +1,125 @@
-# Meeting Room Booking Management System
+# 🏛️ RoomBook — Meeting Room Booking System MVP
 
-Membangun MVP sistem booking ruang meeting berdasarkan [plan.md](file:///c:/dev/booking-room/plan.md). Hanya **Administrator** yang bisa login & melakukan booking. UI kalender mirip Google Calendar (FullCalendar) per room.
-
-## User Review Required
-
-> [!IMPORTANT]
-> **Hanya Admin Login**: Sesuai permintaan, hanya role `admin` yang bisa login dan melakukan booking. Fitur registrasi ditiadakan — admin di-seed langsung ke database.
-
-> [!IMPORTANT]
-> **Seed Data**: Akan dibuat script seed untuk:
-> - 1 admin default (email: `admin@company.com`, password: `admin123`)
-> - 3 lantai dengan masing-masing 2-3 ruang meeting
-> Apakah data seed ini sudah sesuai?
-
-## Open Questions
-
-> [!NOTE]
-> **Jam Operasional**: Calendar akan menampilkan slot waktu 07:00 - 21:00. Apakah ini sesuai?
-
-> [!NOTE]
-> **Bahasa UI**: Apakah UI akan dalam Bahasa Indonesia atau Bahasa Inggris?
+**RoomBook** adalah aplikasi MVP (Minimum Viable Product) untuk manajemen dan pemesanan ruang rapat (meeting room) yang dirancang secara modern, responsif, dan kaya estetika. Aplikasi ini mendukung penuh mode Terang/Gelap dengan transisi animasi premium, dukungan Progressive Web App (PWA), serta ditenagai oleh **Neon Database (Serverless PostgreSQL)** dan **Better Auth**.
 
 ---
 
-## Proposed Changes
+## ✨ Fitur Utama
 
-### 1. Project Initialization
+1. **📅 Kalender Interaktif Publik & Privat**
+   * **Landing Page Publik**: Tamu (tanpa login) dapat melihat ketersediaan jadwal pemakaian semua ruangan melalui kalender bulanan (`FullCalendar`), memfilter berdasarkan ruangan, dan melihat detail rapat melalui modal popup *read-only*.
+   * **Kalender Detail Per Ruangan**: Pengguna terautentikasi dapat melihat jadwal per ruangan dengan tampilan harian, mingguan, dan bulanan, serta membuat pemesanan langsung dengan mengeklik atau memblok slot waktu kosong.
+
+2. **🚫 Proteksi Pemesanan Masa Lampau (Past Booking Prevention)**
+   * **Validasi Client-Side**: Kalender secara otomatis mendeteksi jika pengguna mencoba memesan slot waktu yang sudah terlewat (di masa lalu). Pilihan akan dibatalkan secara instan, pemesanan diblokir, dan toast error akan muncul: *"Tidak dapat membuat booking di masa lampau."*
+   * **Validasi Server-Side**: Server Action `createBooking` menerapkan validasi ketat untuk menolak pembuatan jadwal pemesanan di masa lalu guna menjaga integritas data database.
+
+3. **🌓 Dark & Light Mode dengan Circular ClipPath Transition**
+   * Mendukung penuh mode Terang, Gelap, dan Sistem (mengikuti OS) menggunakan `next-themes`.
+   * Integrasi **Circular View Transition API** (`document.startViewTransition`) saat berganti tema, memberikan efek animasi lingkaran ekspansi yang melebar halus dari titik koordinat klik pengguna.
+
+4. **📱 Progressive Web App (PWA) & Custom Install Button**
+   * Terdaftar sebagai aplikasi PWA dengan manifest lengkap (`manifest.webmanifest`) dan ikon beresolusi tinggi (512x512 & 192x192 PNG).
+   * **Service Worker Caching**: Strategi *Stale-While-Revalidate* untuk mempercepat pemuatan aset statis dan menyediakan halaman fallback offline.
+   * **Custom Install CTA**: Tombol "Pasang Aplikasi" di area Navbar & Hero yang otomatis terdeteksi dan disembunyikan jika aplikasi sudah terpasang di perangkat pengguna (*standalone mode*).
+
+5. **💼 Manajemen Admin Lengkap (CRUD)**
+   * **Lantai**: Admin dapat membuat, membaca, memperbarui (nama & nomor lantai), serta menghapus lantai.
+   * **Ruangan**: Admin dapat mengelola ruangan, mengatur kapasitas, tipe ruangan, status aktif/nonaktif, serta menambahkan daftar fasilitas ruangan.
+   * **Pills Fasilitas**: Fasilitas ruangan diubah dari teks koma menjadi elemen visual berbentuk badge/pills yang rapi dan elegan.
+
+6. **🌍 Navigasi Cepat Dashboard ke Beranda**
+   * Ikon **Globe** di samping Theme Toggle di header dashboard memudahkan Admin/User untuk berpindah kembali ke Halaman Utama publik dengan satu klik tanpa perlu keluar/logout dari aplikasi.
+
+---
+
+## 🛠️ Stack Teknologi
+
+* **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) dengan compiler **Turbopack**
+* **Database & ORM**: [Neon Serverless PostgreSQL](https://neon.tech/) & [Drizzle ORM](https://orm.drizzle.team/)
+* **Autentikasi**: [Better Auth](https://www.better-auth.com/) (menggunakan PostgreSQL adapter)
+* **Kalender**: [FullCalendar React Widget](https://fullcalendar.io/)
+* **Styling**: [TailwindCSS v4](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
+* **Ikon**: [Lucide React](https://lucide.dev/)
+* **Notifikasi**: [Sonner Toast](https://github.com/emilkowalski/sonner)
+
+---
+
+## ⚙️ Persyaratan Sistem & Konfigurasi Lingkungan
+
+Sebelum menjalankan aplikasi secara lokal, pastikan Anda telah menyiapkan akun dan database di **Neon Console** untuk mendapatkan koneksi string PostgreSQL.
+
+Buat file `.env` di direktori utama proyek dan lengkapi variabel berikut:
+
+```env
+# Better Auth Secret (Bisa diganti dengan string acak/secure key)
+BETTER_AUTH_SECRET=meeting-room-booking-secret-key-2024-very-secure
+
+# Better Auth URL (Gunakan URL local development)
+BETTER_AUTH_URL=http://localhost:3000
+
+# Neon Database URL (Salin koneksi string PostgreSQL serverless dari dashboard Neon Anda)
+DATABASE_URL=postgresql://<user>:<password>@<neon-host>/neondb?sslmode=require
+```
+
+---
+
+## 🚀 Instalasi & Menjalankan Aplikasi Secara Lokal
+
+Ikuti langkah-langkah di bawah ini untuk memulai:
+
+1. **Instal Dependensi**:
+   ```bash
+   npm install
+   ```
+
+2. **Jalankan Migrasi Database**:
+   Menerapkan skema tabel relasional PostgreSQL ke database Neon cloud Anda:
+   ```bash
+   npm run db:migrate
+   ```
+
+3. **Populasikan Data Awal (Seeding)**:
+   Mengisi database dengan akun admin default, 4 lantai, dan 10 ruang rapat dengan fasilitas lengkap:
+   ```bash
+   npm run db:seed
+   ```
+   *(Atau jalankan kombinasi perintah migrasi & seed sekaligus menggunakan `npm run db:all`)*
+
+4. **Jalankan Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Buka browser di alamat [http://localhost:3000](http://localhost:3000) untuk mengakses aplikasi.
+
+5. **Uji Produksi Build**:
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 🔐 Kredensial Default Administrator (Seed)
+
+Untuk masuk ke panel pengelolaan (Dashboard):
+* **Email**: `admin@company.com`
+* **Password**: `admin123`
+* **Role**: `admin`
+
+---
+
+## 🚀 Panduan Deployment ke Vercel
+
+Aplikasi ini dirancang *cloud-native* dan serverless-friendly sehingga dapat di-deploy ke Vercel secara mulus:
+
+1. Buat proyek baru di **Vercel** dan hubungkan ke repositori GitHub proyek ini.
+2. Tambahkan variabel lingkungan (`Environment Variables`) di setelan proyek Vercel Anda:
+   * `DATABASE_URL` (sesuai koneksi string Neon)
+   * `BETTER_AUTH_SECRET` (string acak panjang)
+   * `BETTER_AUTH_URL` (URL domain Vercel Anda, contoh: `https://my-roombook.vercel.app`)
+3. Jalankan build deployment. Vercel secara otomatis mendeteksi konfigurasi Turbopack Next.js dan melakukan kompilasi statis serta serverless functions.
+
+### 2. Project Initialization
 
 #### [NEW] Next.js 16 Project Setup
 
@@ -55,296 +149,3 @@ npx shadcn@latest add button sheet skeleton toast sonner card dialog input label
 ```
 
 ---
-
-### 2. Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx              # Root layout + font + providers
-│   ├── page.tsx                # Redirect to /dashboard
-│   ├── globals.css             # Global styles + FullCalendar overrides
-│   ├── login/
-│   │   └── page.tsx            # Login page (admin only)
-│   ├── dashboard/
-│   │   ├── layout.tsx          # Dashboard layout (sidebar + header)
-│   │   ├── page.tsx            # Dashboard overview (floor cards)
-│   │   ├── rooms/
-│   │   │   ├── page.tsx        # Room management (CRUD)
-│   │   │   └── [roomId]/
-│   │   │       └── page.tsx    # Room calendar view (FullCalendar)
-│   │   ├── floors/
-│   │   │   └── page.tsx        # Floor management (CRUD)
-│   │   └── bookings/
-│   │       └── page.tsx        # All bookings list view
-│   └── api/
-│       ├── auth/[...all]/
-│       │   └── route.ts        # Better Auth handler
-│       ├── floors/
-│       │   └── route.ts        # Floor CRUD API
-│       ├── rooms/
-│       │   └── route.ts        # Room CRUD API
-│       └── bookings/
-│           └── route.ts        # Booking CRUD API
-├── components/
-│   ├── ui/                     # Shadcn components
-│   ├── layout/
-│   │   ├── sidebar.tsx         # Dashboard sidebar navigation
-│   │   ├── header.tsx          # Top header + user menu
-│   │   └── mobile-nav.tsx      # Mobile navigation sheet
-│   ├── dashboard/
-│   │   ├── floor-card.tsx      # Floor card with room status
-│   │   ├── room-status-badge.tsx
-│   │   └── stats-overview.tsx  # Quick stats (total rooms, active bookings)
-│   ├── calendar/
-│   │   ├── room-calendar.tsx   # FullCalendar wrapper per room
-│   │   ├── booking-dialog.tsx  # Create/edit booking modal
-│   │   └── event-tooltip.tsx   # Hover tooltip for events
-│   ├── rooms/
-│   │   ├── room-form.tsx       # Create/edit room form
-│   │   └── room-table.tsx      # Room list table
-│   ├── floors/
-│   │   ├── floor-form.tsx      # Create/edit floor form
-│   │   └── floor-table.tsx     # Floor list table
-│   └── bookings/
-│       ├── booking-table.tsx   # All bookings table
-│       └── booking-filters.tsx # Filter by room/floor/date
-├── lib/
-│   ├── auth.ts                 # Better Auth server config
-│   ├── auth-client.ts          # Better Auth client
-│   └── utils.ts                # Utility functions
-├── db/
-│   ├── index.ts                # Drizzle DB connection
-│   ├── schema/
-│   │   ├── floors.ts
-│   │   ├── rooms.ts
-│   │   ├── bookings.ts
-│   │   └── index.ts            # Re-export all schemas
-│   ├── seed.ts                 # Seed script
-│   └── migrations/
-├── stores/
-│   └── booking-store.ts        # Zustand store
-├── actions/
-│   ├── floor-actions.ts        # Server actions for floors
-│   ├── room-actions.ts         # Server actions for rooms
-│   └── booking-actions.ts      # Server actions for bookings
-└── middleware.ts               # Auth middleware (protect routes)
-```
-
----
-
-### 3. Database Layer
-
-#### [NEW] `src/db/schema/floors.ts`
-```typescript
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-
-export const floors = sqliteTable("floors", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  floorNumber: integer("floor_number").notNull().unique(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-});
-```
-
-#### [NEW] `src/db/schema/rooms.ts`
-```typescript
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { floors } from "./floors";
-
-export const rooms = sqliteTable("rooms", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  floorId: integer("floor_id").notNull().references(() => floors.id),
-  name: text("name").notNull(),
-  capacity: integer("capacity").notNull().default(10),
-  roomType: text("room_type", { enum: ["small", "medium", "large", "boardroom"] }).default("medium"),
-  isActive: integer("is_active", { mode: "boolean" }).default(true),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-});
-```
-
-#### [NEW] `src/db/schema/bookings.ts`
-```typescript
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { rooms } from "./rooms";
-
-export const bookings = sqliteTable("bookings", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  roomId: integer("room_id").notNull().references(() => rooms.id),
-  userId: text("user_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  startTime: text("start_time").notNull(), // ISO datetime
-  endTime: text("end_time").notNull(),     // ISO datetime
-  status: text("status", { enum: ["active", "cancelled"] }).default("active"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-});
-```
-
-#### [NEW] `src/db/index.ts`
-- Singleton Drizzle instance menggunakan `better-sqlite3`
-- Database file: `sqlite.db` di root project
-
-#### [NEW] `src/db/seed.ts`
-- Seed 1 admin user via Better Auth
-- Seed 3 floors (Lantai 1, Lantai 2, Lantai 3)
-- Seed 7 rooms tersebar di 3 lantai dengan berbagai kapasitas
-
-#### [NEW] `drizzle.config.ts`
-- Schema path: `./src/db/schema`
-- Out: `./drizzle/migrations`
-- Dialect: `sqlite`
-
----
-
-### 4. Authentication
-
-#### [NEW] `src/lib/auth.ts`
-- Better Auth dengan Drizzle adapter (SQLite)
-- `emailAndPassword` enabled
-- User table menggunakan Better Auth built-in (tambah field `role`)
-
-#### [NEW] `src/lib/auth-client.ts`
-- `createAuthClient()` untuk frontend
-
-#### [NEW] `src/middleware.ts`
-- Protect semua route `/dashboard/*`
-- Redirect ke `/login` jika belum authenticated
-- Cek role `admin` — reject non-admin
-
-#### [NEW] `src/app/api/auth/[...all]/route.ts`
-- Better Auth route handler
-
----
-
-### 5. API Routes (Server Actions)
-
-#### [NEW] `src/actions/floor-actions.ts`
-- `getFloors()` — list all floors
-- `createFloor(data)` — create floor
-- `updateFloor(id, data)` — update floor
-- `deleteFloor(id)` — delete floor (cascade check)
-
-#### [NEW] `src/actions/room-actions.ts`
-- `getRooms(floorId?)` — list rooms, optional filter by floor
-- `getRoomById(id)` — single room with bookings
-- `createRoom(data)` — create room
-- `updateRoom(id, data)` — update room
-- `deleteRoom(id)` — soft delete (set isActive=false)
-
-#### [NEW] `src/actions/booking-actions.ts`
-- `getBookings(roomId, dateRange)` — bookings for calendar
-- `createBooking(data)` — create with overlap validation
-- `updateBooking(id, data)` — update booking
-- `cancelBooking(id)` — cancel (set status=cancelled)
-- **Overlap validation**: Cek apakah ada booking aktif di room yang sama pada waktu yang overlap
-
----
-
-### 6. Frontend — Pages & Components
-
-#### [NEW] Login Page (`src/app/login/page.tsx`)
-- Email & password form
-- Clean, modern design dengan glassmorphism card
-- Logo/brand di atas form
-- Error handling untuk invalid credentials
-
-#### [NEW] Dashboard Layout (`src/app/dashboard/layout.tsx`)
-- Sidebar kiri dengan navigasi: Dashboard, Rooms, Floors, Bookings
-- Top header dengan user info dan logout button
-- Responsive: sidebar collapse di mobile → sheet drawer
-
-#### [NEW] Dashboard Overview (`src/app/dashboard/page.tsx`)
-- Stats cards: Total Floors, Total Rooms, Active Bookings Today, Available Rooms Now
-- Floor cards grid — klik untuk lihat rooms di lantai tersebut
-- Setiap floor card menampilkan jumlah room dan status terkini
-
-#### [NEW] Room Calendar Page (`src/app/dashboard/rooms/[roomId]/page.tsx`)
-**Ini adalah halaman utama — UI mirip Google Calendar**
-- FullCalendar dengan view: Day, Week, Month
-- Default view: `timeGridWeek`
-- Slot waktu 07:00 — 21:00
-- `nowIndicator` (garis merah waktu sekarang)
-- Klik slot kosong → dialog create booking
-- Klik event → dialog detail/edit/cancel booking
-- Drag & drop untuk reschedule
-- Warna event sesuai status (active=blue, cancelled=gray)
-- Header menampilkan nama room, kapasitas, lantai
-
-#### [NEW] Room Management (`src/app/dashboard/rooms/page.tsx`)
-- Table daftar semua rooms dengan kolom: Name, Floor, Capacity, Type, Status
-- Button Add Room → dialog form
-- Actions: Edit, Delete, View Calendar
-- Filter by floor
-
-#### [NEW] Floor Management (`src/app/dashboard/floors/page.tsx`)
-- Table daftar semua floors
-- CRUD via dialog forms
-
-#### [NEW] Bookings List (`src/app/dashboard/bookings/page.tsx`)
-- Table semua bookings dengan filter
-- Kolom: Room, Floor, Title, Date/Time, Status
-- Action: Cancel booking
-
----
-
-### 7. UI/UX Design System
-
-#### Color Palette
-| Token | Value | Usage |
-|-------|-------|-------|
-| Primary | `hsl(221, 83%, 53%)` | #3B82F6 — Buttons, links, active states |
-| Primary Dark | `hsl(221, 83%, 43%)` | Hover states |
-| Success | `hsl(142, 71%, 45%)` | Available rooms, confirmed |
-| Warning | `hsl(38, 92%, 50%)` | Warnings |
-| Danger | `hsl(0, 84%, 60%)` | Cancel, delete, errors |
-| Background | `hsl(222, 47%, 11%)` | Dark mode base |
-| Surface | `hsl(217, 33%, 17%)` | Cards, panels |
-| Border | `hsl(217, 19%, 27%)` | Borders |
-
-#### Typography
-- Font: **Inter** dari Google Fonts
-- Heading sizes: 2xl, xl, lg (font-semibold)
-- Body: base (font-normal)
-
-#### Dark Mode Default
-- Menggunakan dark mode sebagai default untuk kesan modern/premium
-- Glassmorphism pada login card dan dialogs
-
-#### FullCalendar Custom Styling
-- Override CSS variables untuk match dark theme
-- Custom event rendering dengan rounded corners
-- Smooth transitions pada hover
-
----
-
-### 8. State Management
-
-#### [NEW] `src/stores/booking-store.ts`
-```typescript
-// Zustand store untuk:
-// - Selected room
-// - Selected date range  
-// - Calendar view mode (day/week/month)
-// - Booking form state
-// - UI state (dialog open/close)
-```
-
----
-
-## Verification Plan
-
-### Automated Tests
-1. **Build test**: `npm run build` — pastikan zero errors
-2. **Dev server**: `npm run dev` — pastikan halaman load < 2 detik
-3. **Database**: Jalankan migrations dan seed, verifikasi data masuk
-
-### Manual Verification
-1. Login dengan admin credentials → berhasil masuk dashboard
-2. Dashboard menampilkan floor cards dengan room counts
-3. Klik room → calendar view tampil dengan Google Calendar style
-4. Create booking via klik slot → booking muncul di calendar
-5. Cancel booking → status berubah, warna event berubah
-6. Overlap validation → coba book slot yang sudah terisi → error
-7. Responsive test: resize browser → sidebar collapse, calendar adapt
-8. CRUD Floor & Room → semua operasi berfungsi
