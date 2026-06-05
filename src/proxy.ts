@@ -11,20 +11,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Check for session cookie (handles both HTTP for localhost and HTTPS for Vercel/production)
+  const sessionCookie =
+    request.cookies.get("better-auth.session_token") ||
+    request.cookies.get("__Secure-better-auth.session_token");
 
   if (!sessionCookie && (pathname.startsWith("/dashboard") || pathname.startsWith("/roombook"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // if (!sessionCookie && pathname === "/") {
-  //   return NextResponse.redirect(new URL("/login", request.url));
-  // }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/roombook/:path*"],
+  matcher: ["/dashboard/:path*", "/roombook/:path*"],
 };

@@ -23,6 +23,7 @@ export default function LoginPage() {
       const result = await signIn.email({
         email,
         password,
+        callbackURL: "/dashboard",
       });
 
       if (result.error) {

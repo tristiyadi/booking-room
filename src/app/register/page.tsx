@@ -37,6 +37,7 @@ export default function RegisterPage() {
         name,
         email,
         password,
+        callbackURL: "/dashboard",
       });
 
       if (result.error) {
