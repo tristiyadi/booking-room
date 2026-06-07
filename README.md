@@ -1,4 +1,4 @@
-# 🏛️ RoomBook Web — Meeting Room Booking System
+# 🏛️ RoomBookMeet Web — Meeting Room Booking System
 
 **RoomBook** adalah aplikasi untuk manajemen dan pemesanan ruang rapat (meeting room) yang dirancang secara modern, responsif, dan kaya estetika. Aplikasi ini mendukung penuh mode Terang/Gelap dengan transisi animasi premium, dukungan Progressive Web App (PWA), serta ditenagai oleh **Neon Database (Serverless PostgreSQL)** dan **Better Auth**.
 
