@@ -45,6 +45,7 @@ async function seed() {
       capacity: 8,
       roomType: "medium" as const,
       facilities: "Monitor TV 55 Inch, Papan Tulis, Proyektor",
+      panoramaUrl: "/panoramas/garuda_360.png",
     },
     {
       floorId: insertedFloors[0].id,
@@ -52,6 +53,7 @@ async function seed() {
       capacity: 4,
       roomType: "small" as const,
       facilities: "Televisi, Papan Tulis",
+      panoramaUrl: "/panoramas/cendrawasih_360.png",
     },
     {
       floorId: insertedFloors[0].id,
@@ -59,6 +61,7 @@ async function seed() {
       capacity: 6,
       roomType: "small" as const,
       facilities: "Papan Tulis, Speakerphone",
+      panoramaUrl: "/panoramas/merak_360.png",
     },
     // Lantai 2 - 3 rooms
     {
@@ -67,6 +70,7 @@ async function seed() {
       capacity: 12,
       roomType: "large" as const,
       facilities: "Monitor TV 65 Inch, Papan Tulis, Sound System, Mic",
+      panoramaUrl: "/panoramas/komodo_360.png",
     },
     {
       floorId: insertedFloors[1].id,
@@ -74,6 +78,7 @@ async function seed() {
       capacity: 8,
       roomType: "medium" as const,
       facilities: "Monitor TV 55 Inch, Papan Tulis, AC",
+      panoramaUrl: "/panoramas/anoa_360.png",
     },
     {
       floorId: insertedFloors[1].id,
@@ -81,6 +86,7 @@ async function seed() {
       capacity: 6,
       roomType: "small" as const,
       facilities: "Papan Tulis, AC",
+      panoramaUrl: "/panoramas/banteng_360.png",
     },
     // Lantai 3 - 2 rooms
     {
@@ -89,6 +95,7 @@ async function seed() {
       capacity: 20,
       roomType: "boardroom" as const,
       facilities: "Proyektor Layar Lebar, Smart Board, Sound System, Video Conference Kit",
+      panoramaUrl: "/panoramas/rajawali_360.png",
     },
     {
       floorId: insertedFloors[2].id,
@@ -96,6 +103,7 @@ async function seed() {
       capacity: 10,
       roomType: "medium" as const,
       facilities: "Monitor TV 55 Inch, Papan Tulis, AC",
+      panoramaUrl: "/panoramas/elang_360.png",
     },
     // Lantai 4 - 2 rooms
     {
@@ -104,6 +112,7 @@ async function seed() {
       capacity: 30,
       roomType: "boardroom" as const,
       facilities: "Proyektor Layar Lebar, Sound System, Piano, Stage, Video Conference Kit, TV 85 Inch",
+      panoramaUrl: "/panoramas/nusantara_360.png",
     },
     {
       floorId: insertedFloors[3].id,
@@ -111,6 +120,7 @@ async function seed() {
       capacity: 15,
       roomType: "large" as const,
       facilities: "Proyektor, Smart Board, Sound System, AC",
+      panoramaUrl: "/panoramas/pancasila_360.png",
     },
   ];
 

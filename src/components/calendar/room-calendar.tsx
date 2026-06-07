@@ -29,7 +29,7 @@ interface RoomCalendarProps {
 export function RoomCalendar({
   roomId,
   roomName,
-  bookings,
+  bookings: initialBookings,
   userId,
 }: RoomCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
@@ -40,31 +40,35 @@ export function RoomCalendar({
   } | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [currentView, setCurrentView] = useState("timeGridWeek");
+  const [localBookings, setLocalBookings] = useState<Booking[]>(initialBookings);
 
-  const events: EventInput[] = bookings.map((booking) => ({
-    id: String(booking.id),
-    title: booking.title,
-    start: booking.startTime,
-    end: booking.endTime,
-    backgroundColor:
-      booking.status === "cancelled"
-        ? "#6b7280"
-        : booking.userId === userId
+  // Sync local bookings when server data changes (after router.refresh)
+  useEffect(() => {
+    setLocalBookings(initialBookings);
+  }, [initialBookings]);
+
+  const events: EventInput[] = localBookings
+    .filter((b) => b.status !== "cancelled")
+    .map((booking) => ({
+      id: String(booking.id),
+      title: booking.title,
+      start: booking.startTime,
+      end: booking.endTime,
+      backgroundColor:
+        booking.userId === userId
           ? "#3b82f6"
           : "#8b5cf6",
-    borderColor:
-      booking.status === "cancelled"
-        ? "#4b5563"
-        : booking.userId === userId
+      borderColor:
+        booking.userId === userId
           ? "#2563eb"
           : "#7c3aed",
-    textColor: "#ffffff",
-    extendedProps: {
-      description: booking.description,
-      status: booking.status,
-      bookingUserId: booking.userId,
-    },
-  }));
+      textColor: "#ffffff",
+      extendedProps: {
+        description: booking.description,
+        status: booking.status,
+        bookingUserId: booking.userId,
+      },
+    }));
 
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
     const calendarApi = selectInfo.view.calendar;
@@ -119,7 +123,7 @@ export function RoomCalendar({
 
   const handleEventClick = useCallback(
     (clickInfo: EventClickArg) => {
-      const booking = bookings.find(
+      const booking = localBookings.find(
         (b) => String(b.id) === clickInfo.event.id
       );
       if (booking) {
@@ -128,7 +132,7 @@ export function RoomCalendar({
         setDialogOpen(true);
       }
     },
-    [bookings]
+    [localBookings]
   );
 
   const handleDialogClose = () => {
@@ -136,6 +140,15 @@ export function RoomCalendar({
     setSelectedRange(null);
     setSelectedBooking(null);
   };
+
+  // Optimistically remove cancelled booking from calendar
+  const handleBookingCancelled = useCallback((bookingId: number) => {
+    setLocalBookings((prev) =>
+      prev.map((b) =>
+        b.id === bookingId ? { ...b, status: "cancelled" } : b
+      )
+    );
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -170,10 +183,6 @@ export function RoomCalendar({
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm bg-purple-500" />
             <span>Lainnya</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-gray-500" />
-            <span>Dibatalkan</span>
           </div>
         </div>
       </div>
@@ -238,6 +247,7 @@ export function RoomCalendar({
         userId={userId}
         selectedRange={selectedRange}
         selectedBooking={selectedBooking}
+        onBookingCancelled={handleBookingCancelled}
       />
     </div>
   );

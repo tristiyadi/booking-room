@@ -15,6 +15,7 @@ export async function getRooms(floorId?: number) {
         roomType: rooms.roomType,
         isActive: rooms.isActive,
         facilities: rooms.facilities,
+        panoramaUrl: rooms.panoramaUrl,
         floorId: rooms.floorId,
         floorName: floors.name,
         floorNumber: floors.floorNumber,
@@ -34,6 +35,7 @@ export async function getRooms(floorId?: number) {
       roomType: rooms.roomType,
       isActive: rooms.isActive,
       facilities: rooms.facilities,
+      panoramaUrl: rooms.panoramaUrl,
       floorId: rooms.floorId,
       floorName: floors.name,
       floorNumber: floors.floorNumber,
@@ -53,6 +55,7 @@ export async function getRoomById(id: number) {
       roomType: rooms.roomType,
       isActive: rooms.isActive,
       facilities: rooms.facilities,
+      panoramaUrl: rooms.panoramaUrl,
       floorId: rooms.floorId,
       floorName: floors.name,
       floorNumber: floors.floorNumber,
@@ -69,6 +72,7 @@ export async function createRoom(data: {
   capacity: number;
   roomType: "small" | "medium" | "large" | "boardroom";
   facilities?: string | null;
+  panoramaUrl?: string | null;
 }) {
   const result = await db.insert(rooms).values(data).returning();
   revalidatePath("/dashboard");
@@ -84,6 +88,7 @@ export async function updateRoom(
     capacity?: number;
     roomType?: "small" | "medium" | "large" | "boardroom";
     facilities?: string | null;
+    panoramaUrl?: string | null;
     isActive?: boolean;
   }
 ) {

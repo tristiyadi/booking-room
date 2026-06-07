@@ -92,6 +92,7 @@ export async function createBooking(data: {
   }
 
   const result = await db.insert(bookings).values(data).returning();
+  revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath(`/roombook/rooms/${data.roomId}`);
   revalidatePath("/roombook/bookings");
@@ -169,8 +170,12 @@ export async function updateBooking(
     .set(data)
     .where(eq(bookings.id, id))
     .returning();
+  revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/roombook/bookings");
+  if (result[0]) {
+    revalidatePath(`/roombook/rooms/${result[0].roomId}`);
+  }
   return result[0];
 }
 
@@ -180,7 +185,11 @@ export async function cancelBooking(id: number) {
     .set({ status: "cancelled" })
     .where(eq(bookings.id, id))
     .returning();
+  revalidatePath("/");
   revalidatePath("/dashboard");
   revalidatePath("/roombook/bookings");
+  if (result[0]) {
+    revalidatePath(`/roombook/rooms/${result[0].roomId}`);
+  }
   return result[0];
 }

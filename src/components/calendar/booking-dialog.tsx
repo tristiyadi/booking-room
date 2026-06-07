@@ -21,6 +21,7 @@ interface BookingDialogProps {
     status: string;
     userId: string;
   } | null;
+  onBookingCancelled?: (bookingId: number) => void;
 }
 
 export function BookingDialog({
@@ -31,6 +32,7 @@ export function BookingDialog({
   userId,
   selectedRange,
   selectedBooking,
+  onBookingCancelled,
 }: BookingDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -95,6 +97,8 @@ export function BookingDialog({
     setLoading(true);
     try {
       await cancelBooking(selectedBooking.id);
+      // Optimistically update calendar UI immediately
+      onBookingCancelled?.(selectedBooking.id);
       onClose();
       router.refresh();
     } catch {

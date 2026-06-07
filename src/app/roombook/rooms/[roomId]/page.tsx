@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { RoomCalendar } from "@/components/calendar/room-calendar";
+import { RoomPanoramaButton } from "@/components/rooms/room-panorama-button";
 import Link from "next/link";
 import { ArrowLeft, Users, Building2, DoorOpen } from "lucide-react";
 
@@ -87,6 +88,11 @@ export default async function RoomCalendarPage({
             )}
           </div>
         </div>
+        {room.panoramaUrl && (
+          <div className="pt-2">
+            <RoomPanoramaButton panoramaUrl={room.panoramaUrl} roomName={room.name} />
+          </div>
+        )}
       </div>
 
       {/* Calendar */}

@@ -11,6 +11,7 @@ export const rooms = pgTable("rooms", {
   roomType: text("room_type").notNull().default("medium"), // small, medium, large, boardroom
   isActive: boolean("is_active").notNull().default(true),
   facilities: text("facilities"),
+  panoramaUrl: text("panorama_url"),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
