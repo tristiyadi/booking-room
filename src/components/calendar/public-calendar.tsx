@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { RoomPanoramaButton } from "@/components/rooms/room-panorama-button";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -53,6 +54,8 @@ interface Room {
   floorId: number;
   floorName: string;
   floorNumber: number;
+  facilities: string | null;
+  panoramaUrl: string | null;
 }
 
 interface PublicCalendarProps {
@@ -203,6 +206,13 @@ export function PublicCalendar({ bookings, rooms, isLoggedIn }: PublicCalendarPr
     boardroom: "Boardroom",
   };
 
+  const roomTypeColors: Record<string, string> = {
+    small: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    medium: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    large: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+    boardroom: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-305">
       {/* Top Navbar */}
@@ -262,11 +272,11 @@ export function PublicCalendar({ bookings, rooms, isLoggedIn }: PublicCalendarPr
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
             Public Schedule View
           </div>
-           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
             Jadwal Pemakaian Ruang Meeting
           </h1>
           <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg">
-            Pantau jadwal ketersediaan ruangan di bawah ini secara realtime. 
+            Pantau jadwal ketersediaan ruangan di bawah ini secara realtime.
             {!isLoggedIn && " Silakan masuk ke akun Anda atau mendaftar untuk melakukan pemesanan ruangan."}
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-3">
@@ -365,6 +375,121 @@ export function PublicCalendar({ bookings, rooms, isLoggedIn }: PublicCalendarPr
               weekday: "short",
             }}
           />
+        </div>
+
+        {/* Room List Section */}
+        <div className="pt-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Daftar Ruang Meeting
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Jelajahi fasilitas dan visualisasi 360° untuk setiap ruangan
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rooms.filter(r => r.isActive).map((room) => (
+              <div
+                key={room.id}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-300 group"
+              >
+                {/* Panorama thumbnail / header */}
+                <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  {room.panoramaUrl ? (
+                    <>
+                      <img
+                        src={room.panoramaUrl}
+                        alt={`Panorama ${room.name}`}
+                        className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-3 right-3">
+                        <RoomPanoramaButton
+                          panoramaUrl={room.panoramaUrl}
+                          roomName={room.name}
+                          className="px-3 py-1.5 text-xs font-medium bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 rounded-lg transition-colors flex items-center gap-1.5 shadow-lg"
+                          buttonText="Lihat 360°"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+                      <DoorOpen className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border backdrop-blur-sm ${roomTypeColors[room.roomType] || "bg-blue-500/20 text-blue-100 border-blue-500/30"}`}
+                    >
+                      {roomTypeLabels[room.roomType] || room.roomType}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {room.name}
+                      </h3>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5" />
+                          {room.floorName}
+                        </span>
+                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                        <span className="flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5" />
+                          {room.capacity} orang
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {room.facilities && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        Fasilitas
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {room.facilities.split(",").slice(0, 4).map((f, idx) => {
+                          const facility = f.trim();
+                          if (!facility) return null;
+                          return (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-[11px] font-medium"
+                            >
+                              {facility}
+                            </span>
+                          );
+                        })}
+                        {room.facilities.split(",").length > 4 && (
+                          <span className="px-2 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-700/50 text-[11px] font-medium italic">
+                            +{room.facilities.split(",").length - 4} lainnya
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={() => setSelectedRoomId(String(room.id))}
+                      className="w-full py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center justify-center gap-2 group/btn"
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                      Filter Jadwal Ruangan Ini
+                      <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all" />
+                    </button>
+                  </div> */}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </main>
 
